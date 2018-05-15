@@ -58,8 +58,11 @@ class DoubanCreateCookies(object):
         password_input = self.driver.find_element_by_xpath('//input[@id="password"]')
         password_input.clear()
         password_input.send_keys(password)
-        if self.driver.find_element_by_xpath('//img[@id="captcha_image"]').get_attribute('src'):
+        try:
+            self.driver.find_element_by_xpath('//img[@id="captcha_image"]').get_attribute('src')
             self.process_vercode()
+        except NoSuchElementException:
+            pass
         login_button = self.driver.find_element_by_xpath('//form[@id="lzform"]//input[@class="btn-submit"]')
         login_button.click()
         time.sleep(5)
@@ -95,7 +98,7 @@ class DoubanCreateCookies(object):
         for cookie in list_cookies:
             cookies[cookie['name']] = cookie['value']
         self.cookies_db.write(username, json.dumps(cookies))
-        print('Cookies was successfully wrote in Redis')
+        print('Cookies of {} was successfully wrote in Redis'.format(username))
 
     def password_error(self, username):
         """

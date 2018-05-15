@@ -3,9 +3,10 @@
 
 from redisdatabase import Redis
 from settings import VERIFY_URL
+import json
+from json.decoder import JSONDecodeError
 import requests
 from lxml import etree
-import json
 
 
 class DoubanVerifyCookies(object):
@@ -16,14 +17,17 @@ class DoubanVerifyCookies(object):
     def run(self):
         for pair in self.cookies_db.key_valued_pairs().items():
             username, cookies = pair
-            if cookies:
+            try:
                 self.verify(username.decode(), json.loads(cookies))
+            except JSONDecodeError:
+                self.cookies_db.delete(username)
+                print('Cookies of {} is illegal or empty, delete it'.format(username.decode()))
 
     def verify(self, username, cookies):
         """
         Add cookies to a requests session and verify if it is valid or not
         """
-        print('Now verifying cookies of:{}'.format(username))
+        print('Now verifying cookies of {}'.format(username))
         headers = {
             'Host': 'www.douban.com',
             'User-Agent': 'Mozilla/5.0',
@@ -33,9 +37,9 @@ class DoubanVerifyCookies(object):
         response = session.get(self.verify_url, headers=headers)
         selector = etree.HTML(response.text)
         if not selector.xpath('//input[@value="更新设置"]'):
-            print('Cookies of:{} is expired'.format(username))
+            print('Cookies of {} is expired'.format(username))
             self.cookies_db.delete(username)
-            print('Delete cookies of:{}'.format(username))
+            print('Delete cookies of {}'.format(username))
         else:
             print('Cookies of {} is valid'.format(username))
 

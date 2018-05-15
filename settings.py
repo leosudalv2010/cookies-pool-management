@@ -13,4 +13,8 @@ LOGIN_URL = 'https://www.douban.com/accounts/'
 LOGINSUCCESS_URL = 'https://www.douban.com/'
 VERIFY_URL = 'https://www.douban.com/accounts/'
 
+# API related parameters
+APIHOST = 'localhost'
+APIPORT = 5000
+
 

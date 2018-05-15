@@ -3,6 +3,8 @@
 
 from redis import StrictRedis, ConnectionPool
 from settings import HOST, PORT, DB, PASSWORD, WEBSITE
+import random
+import json
 
 
 class Redis(object):
@@ -12,8 +14,9 @@ class Redis(object):
         self.redis = StrictRedis(connection_pool=self.pool)
 
     def name(self):
-        # create the name of Redis hash mapping table
-        # category should be 'account' or 'cookies'
+        """
+        Create the name of Redis hash mapping table, category should be 'account' or 'cookies'
+        """
         return '{}:{}'.format(self.category, WEBSITE)
 
     def write(self, key, value):
@@ -27,3 +30,14 @@ class Redis(object):
 
     def key_valued_pairs(self):
         return self.redis.hgetall(self.name())
+
+    def count(self):
+        return len(list(self.key_valued_pairs().values()))
+
+    def random(self):
+        """
+        Fetch a random cookies from the database
+        """
+        cookies_list = list(self.key_valued_pairs().values())
+        random_cookies = random.choice(cookies_list)
+        return random_cookies
